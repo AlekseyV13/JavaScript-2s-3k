@@ -2,60 +2,86 @@
 - Name: Олексій Войчук
 - Group: 232/1
 
-## Практичне заняття №2 — NestJS + PostgreSQL + Redis
+## Практичне заняття №3 — CRUD REST API для MiniShop
 
-## Структура репозиторію
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![TypeORM](https://img.shields.io/badge/TypeORM-FE0902?style=for-the-badge&logo=typeorm&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+
+### ⚙️ Структура репозиторію
+```text
 .
-├── src/             
+├── src/
+│   ├── categories/       # Модуль категорій (Entity, Service, Controller)
+│   ├── products/         # Модуль продуктів (Entity, Service, Controller)
+│   ├── migrations/       # SQL міграції бази даних
+│   ├── data-source.ts    # Конфігурація TypeORM
+│   └── app.module.ts     # Головний модуль
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env.example      
 └── README.md
 
-Перевірка сервісів
+### 🚀 Запуск проекту
+```bash
+cp .env.example .env
+docker compose up --build -d
 
-SERVICE    CREATED             STATUS                    PORTS
-javascript-2s-3k-app-1        javascript-2s-3k-app   "docker-entrypoint.s…"   app        7 minutes ago       Up 21 seconds             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
-javascript-2s-3k-postgres-1   postgres:16-alpine     "docker-entrypoint.s…"   postgres   About an hour ago   Up 27 seconds (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
-javascript-2s-3k-redis-1      redis:7-alpine         "docker-entrypoint.s…"   redis      About an hour ago
+Результати тестування API (CURL / PowerShell)
+1. Тест створення категорії:
+id name        description         createdAt
+-- ----        -----------         ---------
+ 1 Electronics Gadgets and devices 2026-04-08T17:42:10.342Z
 
+2. Тест створення продукту:
 
-Перевірка PostgreSQL
+id          : 1
+name        : iPhone 15
+description :
+price       : 999,99
+stock       : 50
+isActive    : True
+category    : @{id=1}
+createdAt   : 2026-04-08T17:42:27.646Z
+updatedAt   : 2026-04-08T17:42:27.646Z
 
-                                                      List of databases
-   Name    |  Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | ICU Locale | ICU Rules |   Access privileges
------------+----------+----------+-----------------+------------+------------+------------+-----------+-----------------------
- nestdb    | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- postgres  | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- template0 | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/nestuser          +
-           |          |          |                 |            |            
-|            |           | nestuser=CTc/nestuser
- template1 | nestuser | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/nestuser          +
-           |          |          |                 |            |            
-|            |           | nestuser=CTc/nestuser
-(4 rows) 
+3. Тест отримання всіх продуктів:
 
-
-Перевірка Redis
-
-PONG
-
-Перевірка застосунку
-
-Hello World!
-
-Логи NestJS (фрагмент)
-
-[Nest] 29  - 04/01/2026, 6:58:31 PM     LOG [InstanceLoader] TypeOrmCoreModule dependencies initialized +278ms
-[Nest] 29  - 04/01/2026, 6:58:31 PM     LOG [RoutesResolver] AppController {/}: +13ms
-[Nest] 29  - 04/01/2026, 6:58:31 PM     LOG [RouterExplorer] Mapped {/, GET} route +8ms
-[Nest] 29  - 04/01/2026, 6:58:31 PM     LOG [NestApplication] Nest application successfully started +6ms
+id          : 1
+name        : iPhone 15
+description :
+price       : 999.99
+stock       : 50
+isActive    : True
+category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
+createdAt   : 2026-04-08T17:42:27.646Z
+updatedAt   : 2026-04-08T17:42:27.646Z
 
 
 
- SERVICE    CREATED             STATUS                   PORTS
-javascript-2s-3k-app-1        javascript-2s-3k-app   "docker-entrypoint.s…"   app        10 minutes ago      Up 4 minutes             0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
-javascript-2s-3k-postgres-1   postgres:16-alpine     "docker-entrypoint.s…"   postgres   About an hour ago   Up 4 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
-javascript-2s-3k-redis-1      redis:7-alpine         "docker-entrypoint.s…"   redis      About an hour ago   Up 4 minutes (healthy)   0.0.0.0:6379->6379/tcp, [::]
+name        : iPhone 15
+description :
+price       : 999.99
+stock       : 50
+isActive    : True
+category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
+createdAt   : 2026-04-08T17:42:27.646Z
+updatedAt   : 2026-04-08T17:42:27.646Z
 
-:6379->6379/tcp
+
+
+stock       : 50
+isActive    : True
+category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
+createdAt   : 2026-04-08T17:42:27.646Z
+updatedAt   : 2026-04-08T17:42:27.646Z
+
+
+
+category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
+createdAt   : 2026-04-08T17:42:27.646Z
+updatedAt   : 2026-04-08T17:42:27.646Z
+
+
+
+updatedAt   : 2026-04-08T17:42:27.646Z
