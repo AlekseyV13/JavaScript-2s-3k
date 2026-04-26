@@ -2,7 +2,7 @@
 - Name: Олексій Войчук
 - Group: 232/1
 
-## Практичне заняття №3 — CRUD REST API для MiniShop
+## Практичне заняття №4 — DTO + class-validator + Pipes
 
 ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -13,75 +13,71 @@
 ```text
 .
 ├── src/
-│   ├── categories/       # Модуль категорій (Entity, Service, Controller)
-│   ├── products/         # Модуль продуктів (Entity, Service, Controller)
-│   ├── migrations/       # SQL міграції бази даних
-│   ├── data-source.ts    # Конфігурація TypeORM
-│   └── app.module.ts     # Головний модуль
+│   ├── categories/
+│   │   ├── dto/
+│   │   │   ├── create-category.dto.ts
+│   │   │   └── update-category.dto.ts
+│   │   ├── category.entity.ts
+│   │   ├── categories.module.ts
+│   │   ├── categories.service.ts
+│   │   └── categories.controller.ts
+│   ├── products/
+│   │   ├── dto/
+│   │   │   ├── create-product.dto.ts
+│   │   │   └── update-product.dto.ts
+│   │   ├── product.entity.ts
+│   │   ├── products.module.ts
+│   │   ├── products.service.ts
+│   │   └── products.controller.ts
+│   ├── common/
+│   │   └── pipes/
+│   │       └── trim.pipe.ts
+│   ├── migrations/
+│   ├── data-source.ts
+│   ├── main.ts
+│   └── app.module.ts
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
+```
 
 ### 🚀 Запуск проекту
 ```bash
 cp .env.example .env
 docker compose up --build -d
+```
 
-Результати тестування API (CURL / PowerShell)
-1. Тест створення категорії:
-id name        description         createdAt
--- ----        -----------         ---------
- 1 Electronics Gadgets and devices 2026-04-08T17:42:10.342Z
+---
 
-2. Тест створення продукту:
+### 🧪 Результати тестування валідації (class-validator)
 
-id          : 1
-name        : iPhone 15
-description :
-price       : 999,99
-stock       : 50
-isActive    : True
-category    : @{id=1}
-createdAt   : 2026-04-08T17:42:27.646Z
-updatedAt   : 2026-04-08T17:42:27.646Z
+### Тест валідації — порожнє ім'я категорії
+```json
+{
+  "message": [
+    "name must be longer than or equal to 2 characters"
+  ],
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
 
-3. Тест отримання всіх продуктів:
+### Тест валідації — від'ємна ціна продукту
+```json
+{
+  "message": [
+    "price must not be less than 0.01"
+  ],
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
 
-id          : 1
-name        : iPhone 15
-description :
-price       : 999.99
-stock       : 50
-isActive    : True
-category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
-createdAt   : 2026-04-08T17:42:27.646Z
-updatedAt   : 2026-04-08T17:42:27.646Z
-
-
-
-name        : iPhone 15
-description :
-price       : 999.99
-stock       : 50
-isActive    : True
-category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
-createdAt   : 2026-04-08T17:42:27.646Z
-updatedAt   : 2026-04-08T17:42:27.646Z
-
-
-
-stock       : 50
-isActive    : True
-category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
-createdAt   : 2026-04-08T17:42:27.646Z
-updatedAt   : 2026-04-08T17:42:27.646Z
-
-
-
-category    : @{id=1; name=Electronics; description=Gadgets and devices; createdAt=2026-04-08T17:42:10.342Z}
-createdAt   : 2026-04-08T17:42:27.646Z
-updatedAt   : 2026-04-08T17:42:27.646Z
-
-
-
-updatedAt   : 2026-04-08T17:42:27.646Z
+### Тест TrimPipe (обрізання пробілів)
+```json
+{
+  "id": 2,
+  "name": "Accessories",
+  "createdAt": "2026-04-26T18:30:00.000Z"
+}
+```
