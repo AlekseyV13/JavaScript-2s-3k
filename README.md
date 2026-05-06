@@ -1,37 +1,35 @@
 ## Student
 - Name: Олексій Войчук
-- Group: 232/1
+- Group: <Вкажи свою групу тут>
 
-## Практичне заняття №4 — DTO + class-validator + Pipes
+## Практичне заняття №5 — JWT Authentication + Guards + RBAC
 
-![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![TypeORM](https://img.shields.io/badge/TypeORM-FE0902?style=for-the-badge&logo=typeorm&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-
-### ⚙️ Структура репозиторію
-```text
+### Структура репозиторію
 .
 ├── src/
-│   ├── categories/
+│   ├── auth/
 │   │   ├── dto/
-│   │   │   ├── create-category.dto.ts
-│   │   │   └── update-category.dto.ts
-│   │   ├── category.entity.ts
-│   │   ├── categories.module.ts
-│   │   ├── categories.service.ts
-│   │   └── categories.controller.ts
-│   ├── products/
-│   │   ├── dto/
-│   │   │   ├── create-product.dto.ts
-│   │   │   └── update-product.dto.ts
-│   │   ├── product.entity.ts
-│   │   ├── products.module.ts
-│   │   ├── products.service.ts
-│   │   └── products.controller.ts
+│   │   │   ├── register.dto.ts
+│   │   │   └── login.dto.ts
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   └── auth.controller.ts
+│   ├── users/
+│   │   ├── user.entity.ts
+│   │   ├── users.module.ts
+│   │   └── users.service.ts
 │   ├── common/
-│   │   └── pipes/
-│   │       └── trim.pipe.ts
+│   │   ├── enums/
+│   │   │   └── role.enum.ts
+│   │   ├── guards/
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   └── roles.guard.ts
+│   │   ├── decorators/
+│   │   │   ├── current-user.decorator.ts
+│   │   │   └── roles.decorator.ts
+│   ├── categories/
+│   ├── products/
+│   ├── orders/
 │   ├── migrations/
 │   ├── data-source.ts
 │   ├── main.ts
@@ -39,45 +37,86 @@
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
-```
-
-### 🚀 Запуск проекту
+### Запуск проекту
 ```bash
 cp .env.example .env
-docker compose up --build -d
-```
+docker compose up --build
+API EndpointsMethodURLAuthRole
+POST/auth/register--
+POST/auth/login--
+GET/api/categories--
+POST/api/categories JWT admin
+GET/api/products--
+POST/api/products JWT admin
+PATCH/api/products/:id JWT admin
+DELETE/api/products/:id JWT admin
+POST/api/orders JWT user/admin
 
----
-
-### 🧪 Результати тестування валідації (class-validator)
-
-### Тест валідації — порожнє ім'я категорії
-```json
+Тест реєстрації
+JSON
 {
-  "message": [
-    "name must be longer than or equal to 2 characters"
-  ],
-  "error": "Bad Request",
-  "statusCode": 400
+  "id": 1,
+  "email": "oleksii3@test.com",
+  "name": "Oleksii3",
+  "role": "user",
+  "createdAt": "2026-05-06T10:30:00.000Z"
 }
-```
 
-### Тест валідації — від'ємна ціна продукту
-```json
+Тест логіну
+JSON
 {
-  "message": [
-    "price must not be less than 0.01"
-  ],
-  "error": "Bad Request",
-  "statusCode": 400
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
-```
 
-### Тест TrimPipe (обрізання пробілів)
-```json
+Тест 401 — запит без токена (Unauthorized)
+JSON
+{
+  "message": "Unauthorized",
+  "statusCode": 401
+}
+
+Тест 403 — запит з роллю user (Forbidden)
+JSON
+{
+  "message": "Insufficient permissions",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+
+Тест успішного створення продукту від admin (201 Created)
+JSON
+{
+  "id": 4,
+  "title": "Свічки запалювання Lancer X",
+  "price": 1200,
+  "stock": 0,
+  "image": null,
+  "category": {
+    "id": 1 }
+}
+
+Тест успішного створення замовлення (201 Created)
+JSON
 {
   "id": 2,
-  "name": "Accessories",
-  "createdAt": "2026-04-26T18:30:00.000Z"
+  "createdAt": "2026-05-06T10:42:11.254Z",
+  "status": "pending",
+  "user": {
+    "id": 1,
+    "email": "oleksii3@test.com",
+    "role": "admin"
+  },
+  "items": [
+    {
+      "id": 1,
+      "title": "Масляний фільтр",
+      "price": "350.00"
+    },
+    {
+      "id": 2,
+      "title": "Масляний фільтр",
+      "price": "350.00"
+    }
+  ]
 }
-```
+

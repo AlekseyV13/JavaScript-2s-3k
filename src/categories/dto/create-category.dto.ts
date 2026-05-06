@@ -1,13 +1,11 @@
-import { IsString, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
-  @MinLength(2)
-  @MaxLength(100)
+  @IsNotEmpty({ message: 'Назва категорії обовʼязкова' })
   name: string;
 
-  @IsOptional()
   @IsString()
-  @MaxLength(500)
+  @IsOptional()
   description?: string;
 }

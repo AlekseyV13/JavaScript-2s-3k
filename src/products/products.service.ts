@@ -4,66 +4,63 @@ import { Repository } from 'typeorm';
 import { Product } from './product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { GetProductsFilterDto } from './dto/get-products-filter.dto';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
-    private readonly productRepo: Repository<Product>,
+    private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAll(): Promise<Product[]> {
-    return this.productRepo.find({
-      relations: ['category'],
+  async create(dto: CreateProductDto) {
+    const product = this.productRepository.create({
+      title: dto.title,
+      price: dto.price,
+      category: { id: dto.categoryId } as any,
     });
+    return this.productRepository.save(product);
   }
 
-  async findOne(id: number): Promise<Product> {
-    const product = await this.productRepo.findOne({
-      where: { id },
-      relations: ['category'],
-    });
-    if (!product) {
-      throw new NotFoundException(
-        `Product #${id} not found`,
-      );
+  async findAll(filterDto: GetProductsFilterDto) {
+    const { search, minPrice, maxPrice, page = 1, limit = 10 } = filterDto;
+    const query = this.productRepository.createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category');
+
+    if (search) {
+      query.andWhere('LOWER(product.title) LIKE LOWER(:search)', { search: `%${search}%` });
     }
+    if (minPrice) query.andWhere('product.price >= :minPrice', { minPrice });
+    if (maxPrice) query.andWhere('product.price <= :maxPrice', { maxPrice });
+
+    const skip = (page - 1) * limit;
+    query.skip(skip).take(limit);
+    const [data, total] = await query.getManyAndCount();
+
+    return { data, total, page, lastPage: Math.ceil(total / limit) };
+  }
+
+  async findOne(id: number) {
+    const product = await this.productRepository.findOne({ where: { id }, relations: ['category'] });
+    if (!product) throw new NotFoundException(`Товар з ID ${id} не знайдено`);
     return product;
   }
 
-  async create(dto: CreateProductDto): Promise<Product> {
-    const product = this.productRepo.create({
-      name: dto.name,
-      description: dto.description,
-      price: dto.price,
-      stock: dto.stock ?? 0,
-      category: dto.categoryId
-        ? { id: dto.categoryId } as any
-        : undefined,
-    });
-    return this.productRepo.save(product);
+  async update(id: number, dto: UpdateProductDto) {
+    const product = await this.findOne(id);
+    if (dto.categoryId) product.category = { id: dto.categoryId } as any;
+    Object.assign(product, dto);
+    return this.productRepository.save(product);
   }
 
-  async update(
-    id: number,
-    dto: UpdateProductDto,
-  ): Promise<Product> {
+  async updateImage(id: number, imagePath: string) {
     const product = await this.findOne(id);
-
-    if (dto.name !== undefined) product.name = dto.name;
-    if (dto.description !== undefined)
-      product.description = dto.description;
-    if (dto.price !== undefined) product.price = dto.price;
-    if (dto.stock !== undefined) product.stock = dto.stock;
-    if (dto.categoryId !== undefined) {
-      product.category = { id: dto.categoryId } as any;
-    }
-
-    return this.productRepo.save(product);
+    product.image = imagePath;
+    return this.productRepository.save(product);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     const product = await this.findOne(id);
-    await this.productRepo.remove(product);
+    return this.productRepository.remove(product);
   }
 }
