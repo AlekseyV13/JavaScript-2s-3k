@@ -1,19 +1,35 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, Min, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional, Min, MinLength } from 'class-validator';
 
 export class CreateProductDto {
-  @ApiProperty({ example: 'Свічки запалювання Lancer X' })
+  @ApiProperty({ 
+    example: 'Свічки запалювання Lancer X', 
+    description: 'Назва товару' 
+  })
   @IsString()
-  @IsNotEmpty()
+  @MinLength(2)
   title: string;
 
-  @ApiProperty({ example: 1200 })
+  @ApiProperty({ 
+    example: 1200, 
+    description: 'Ціна товару' 
+  })
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   price: number;
 
-  @ApiProperty({ example: 1 })
+  @ApiPropertyOptional({ 
+    example: 10, 
+    description: 'Кількість на складі' 
+  })
+  @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
+  stock?: number;
+
+  @ApiProperty({ 
+    example: 1, 
+    description: 'ID категорії' 
+  })
+  @IsNumber()
   categoryId: number;
 }
