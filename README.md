@@ -1,47 +1,33 @@
-# Практична робота №6: Документування та обробка помилок у NestJS
+## Student
+- Name: Олексій Войчук
+- Group: 232/1
 
-**Виконав:** Олексій Войчук
-**Група:** [Впиши свою групу]
+## Практичне заняття №7 — Redis + Pagination + Filtering
 
-## Опис проєкту
-У цій роботі реалізовано систему логування, трансформації відповідей та глобальну обробку винятків. Також додано повну документацію API за допомогою Swagger.
+### Запуск проекту
+```bash
+cp .env.example .env
+docker compose up --build -d
+docker compose run --rm app npm run seed
 
-## Реалізовані вправи
+Параметр,Тип,Default,Опис
+page,number,1,Номер сторінки
+pageSize,number,10,Елементів на сторінку (max 100)
+sort,string,id,Поле сортування
+order,asc/desc,desc,Напрямок
+categoryId,number,-,Фільтр за категорією
+minPrice,number,-,Мінімальна ціна
+maxPrice,number,-,Максимальна ціна
+search,string,-,Пошук за назвою (ILIKE)
 
-### 1. Глобальні інтерцептори та фільтри
-*   **TransformInterceptor**: Обгортає всі успішні відповіді у формат `{ data: ..., statusCode: ..., timestamp: ... }`.
-*   **LoggingInterceptor**: Логує кожен HTTP-запит у консоль (метод, шлях, час виконання).
-*   **HttpExceptionFilter**: Перехоплює всі помилки та повертає їх у форматі `{ error: { code, message, traceId }, timestamp }`.
+Результати тестування
+1. Тест пагінації та фільтрації (GET /api/products):
+Виконано запит GET /api/products?search=Lancer&minPrice=100&maxPrice=5000&page=1&limit=10.
+Система успішно прийняла параметри, застосувала QueryBuilder і повернула відповідь з TransformInterceptor. Структура meta (page, pageSize, total, totalPages) генерується коректно.
 
-### 2. Документація Swagger
-Документація доступна за адресою: `http://localhost:3000/api/docs`
+2. Тест наповнення бази (Seed):
+Скрипт npm run seed успішно додає 3 категорії та 30 тестових товарів у базу даних PostgreSQL для тестування пагінації.
 
-**Скріншот Swagger UI:**
-![Swagger UI](./swagger-screenshot.png)
+3. Тест кешування (Redis):
+Команда docker compose exec redis redis-cli KEYS "products:*" підтвердила створення ключів кешу після GET-запитів. Інвалідація кешу налаштована у сервісі при зміні даних (POST/PATCH/DELETE).
 
-### 3. Приклади відповідей API
-
-**Успішне створення товару (201):**
-```json
-{
-  "data": {
-    "id": 1,
-    "title": "Свічки запалювання Lancer X",
-    "price": 1200,
-    "stock": 10
-  },
-  "statusCode": 201,
-  "timestamp": "2026-05-06T17:45:00.000Z"
-}
-
-Приклад помилки (403 Forbidden):
-
-JSON
-{
-  "error": {
-    "code": 403,
-    "message": "Insufficient permissions",
-    "traceId": "f729fe05-eb21-4a46-8989-b2350bd1acd4"
-  },
-  "timestamp": "2026-05-06T17:28:18.320Z"
-}
