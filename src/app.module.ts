@@ -14,6 +14,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { Order } from './orders/entities/order.entity';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [Category, Product, User, Order],
+      entities: [Category, Product, User, Order, OrderItem],
       synchronize: true, 
       dropSchema: true, 
       migrationsRun: false, 

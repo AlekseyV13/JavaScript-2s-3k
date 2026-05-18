@@ -1,26 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../../users/user.entity';
-import { Product } from '../../products/product.entity';
+import { OrderItem } from './order-item.entity';
+import { OrderStatus } from '../../common/enums/order-status.enum';
 
 @Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
+  status: OrderStatus;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  totalPrice: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ default: 'pending' })
-  status: string;
-
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, { eager: false })
   user: User;
 
-  @ManyToMany(() => Product)
-  @JoinTable({
-    name: 'order_items', 
-    joinColumn: { name: 'order_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'product_id', referencedColumnName: 'id' }
-  })
-  items: Product[];
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { eager: true, cascade: true })
+  items: OrderItem[];
 }
